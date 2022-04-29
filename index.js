@@ -41,8 +41,9 @@ class Ball {
         this.y = y
         this.radius = radius
         this.color = color
-        this.x_velocity = 0.001 * canvas.width
-        this.y_velocity = 0.001 * canvas.height
+        this.base_velocity = 0.001
+        this.x_velocity = this.base_velocity * canvas.width
+        this.y_velocity = this.base_velocity * canvas.height
     }
 
     draw(){
@@ -50,6 +51,26 @@ class Ball {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.fillStyle = this.color
         ctx.fill()
+    }
+
+    set_direction(){
+        let forward = Math.random()
+
+        if(forward <= 0.5){
+            ball.x_velocity = -ball.base_velocity * canvas.width
+        }
+        else if (forward >= 0.6){
+            ball.x_velocity = ball.base_velocity * canvas.width
+        }
+
+        let up = Math.random()
+
+        if(up <= 0.5){
+            ball.y_velocity = -ball.base_velocity * canvas.height
+        }
+        else if(up >= 0.6){
+            ball.y_velocity = ball.base_velocity * canvas.height
+        }
     }
 
     update(){
@@ -74,6 +95,7 @@ const player1 = new Player(player1_x, player1_y, canvas.width/50, canvas.height/
 const player2 = new Player(player2_x, player2_y, canvas.width/50, canvas.height/4, 'black')
 const ball = new Ball(ball_x, ball_y, (canvas.width * canvas.height) * 0.00001, 'black')
 
+ball.set_direction()
 
 function animate(){
     requestAnimationFrame(animate)
@@ -96,11 +118,13 @@ function animate(){
     if(ball.x <= 0){
         ball.x = canvas.width/2
         ball.y = canvas.height/2
+        ball.set_direction()
     }
 
     if(ball.x >= canvas.width){
         ball.x = canvas.width/2
         ball.y = canvas.height/2
+        ball.set_direction()
     }
 
     if (ball.x <= player1.x + player1.width && ball.x > player1.x) {
