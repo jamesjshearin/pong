@@ -4,6 +4,11 @@ const ctx = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
+const unit = 2
+
+let previous_canvas_width = canvas.width
+let previous_canvas_height = canvas.height
+
 class Player {
     constructor(x, y, width, height, color) {
         this.x = x
@@ -80,20 +85,39 @@ class Ball {
     }
 }
 
-const ball_x = canvas.width/2
-const ball_y = canvas.height/2
+let ball_relative_x
+let ball_relative_y
+let ball_relative_radius
+let player1_relative_width
+let player1_relative_height
+let player1_relative_x
+let player1_relative_y
+let player2_relative_width
+let player2_relative_height
+let player2_relative_x
+let player2_relative_y
 
-const player1_x = canvas.width/10 - canvas.width/50
-const player1_y = canvas.height/2
+function set_relative_measurements(){
+    ball_relative_x = canvas.width * 0.5
+    ball_relative_y = canvas.height * 0.5
+    ball_relative_radius = (canvas.width * canvas.height) * 0.00001
+    player1_relative_width = canvas.width * 0.005
+    player1_relative_height = canvas.height * 0.25
+    player1_relative_x = canvas.width * 0.1 - player1_relative_width
+    player1_relative_y = canvas.height * 0.5
+    player2_relative_width = canvas.width * 0.005
+    player2_relative_height = canvas.height * 0.25
+    player2_relative_x = canvas.width - canvas.width * 0.1
+    player2_relative_y = canvas.height * 0.5
+}
 
-const player2_x = canvas.width - canvas.width/10
-const player2_y = canvas.height/2
+set_relative_measurements()
 
 const player_speed = 0.005
 
-const player1 = new Player(player1_x, player1_y, canvas.width/50, canvas.height/4, 'black')
-const player2 = new Player(player2_x, player2_y, canvas.width/50, canvas.height/4, 'black')
-const ball = new Ball(ball_x, ball_y, (canvas.width * canvas.height) * 0.00001, 'black')
+const player1 = new Player(player1_relative_x, player1_relative_y, player1_relative_width, player1_relative_height, 'black')
+const player2 = new Player(player2_relative_x, player2_relative_y, player2_relative_width, player2_relative_height, 'black')
+const ball = new Ball(ball_relative_x, ball_relative_y, ball_relative_radius, 'black')
 
 ball.set_direction()
 
@@ -104,11 +128,6 @@ function animate(){
     player1.update()
     player2.update()
 
-    const player_1_distance = Math.hypot(player1.x - ball.x, player1.y - ball.y)
-    const player_2_distance = Math.hypot(player2.x - ball.x, player2.y - ball.y)
-
-    console.log("player 2 Y: " + player2.y)
-    console.log("ball Y: " + ball.y)
 
     // Keep Ball in Bounds
     if(ball.y <= 0 || ball.y >= canvas.height){
@@ -131,10 +150,10 @@ function animate(){
         if (ball.y >= player1.y && ball.y <= player1.y + player1.height) {
             if(ball.x < player1.x + player1.width){
                 if (ball.y <= player1.y){
-                    ball.y_velocity = -0.001 * canvas.height
+                    ball.y_velocity = -ball.base_velocity * canvas.height
                 }
                 else if (ball.y >= player1.y + player1.height){
-                    ball.y_velocity = 0.001 * canvas.height
+                    ball.y_velocity = ball.base_velocity * canvas.height
                 }
             }
             ball.x_velocity *= -1
@@ -144,10 +163,10 @@ function animate(){
         if (ball.y >= player2.y && ball.y <= player2.y + player2.height) {
             if(ball.x > player2.x){
                 if (ball.y <= player2.y){
-                    ball.y_velocity = -0.001 * canvas.height
+                    ball.y_velocity = -ball.base_velocity * canvas.height
                 }
                 else if (ball.y >= player2.y + player2.height){
-                    ball.y_velocity = 0.001 * canvas.height
+                    ball.y_velocity = ball.base_velocity * canvas.height
                 }
             }
             ball.x_velocity *= -1
@@ -195,5 +214,25 @@ addEventListener('keyup', (e) => {
 
     }
 })
+
+onresize = function(){
+    canvas.height = innerHeight
+    canvas.width = innerWidth
+    set_relative_measurements()
+    ball.radius = ball_relative_radius
+    ball.x += previous_canvas_width - canvas.width
+    ball.y += previous_canvas_height - canvas.height
+    player1.width = player1_relative_width
+    player1.height = player1_relative_height
+    player1.x = player1_relative_x
+    player2.width = player2_relative_width
+    player2.height = player2_relative_height
+    player2.x = player2_relative_x
+
+    // Keep track of previous dimensions
+    previous_canvas_width = canvas.width
+    previous_canvas_height = canvas.height
+    location.reload();
+}
 
 animate()
